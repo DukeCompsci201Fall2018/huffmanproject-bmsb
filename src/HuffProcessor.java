@@ -58,7 +58,9 @@ public class HuffProcessor {
 		int[] freqs = new int[ALPH_SIZE + 1];
 		while(true) {
 			int bit = in.readBits(BITS_PER_WORD);
-			if (bit == -1) break;
+			if (bit == -1) {
+				break;
+			}
 			freqs[bit] += 1;
 		}
 		freqs[PSEUDO_EOF] = 1;
@@ -78,7 +80,9 @@ public class HuffProcessor {
 			HuffNode t = new HuffNode(0, left.myWeight + right.myWeight, left, right);
 			pq.add(t);
 		}
-		return pq.remove();
+		
+		HuffNode root = pq.remove();
+		return root;
 	}
 
 	private String[] makeCodingsFromTree(HuffNode root) {
@@ -92,34 +96,34 @@ public class HuffProcessor {
 			encodings[root.myValue] = string;
 			return;
 		}else {
-			if(root.myRight != null) doEncodings(root.myRight, string + "1", encodings);
-			if(root.myLeft != null) doEncodings(root.myLeft, string + "0", encodings);
+			doEncodings(root.myRight, string + "1", encodings);
+			doEncodings(root.myLeft, string + "0", encodings);
 		}
 		
 	}
 
 	private void writeHeader(HuffNode root, BitOutputStream out) {
-		if(root.myLeft != null || root.myRight != null) {
-			out.writeBits(1, 0);
-			if(root.myRight != null) writeHeader(root.myRight, out);
-			if(root.myLeft != null) writeHeader(root.myLeft, out);
-		}else {
+		if (root.myLeft==null && root.myRight==null) {
 			out.writeBits(1,1);
 			out.writeBits(BITS_PER_WORD + 1, root.myValue);
-			return;
+
 		}
-		
+		else {
+			out.writeBits(1,root.myValue);
+			writeHeader(root.myLeft, out);
+			writeHeader(root.myRight, out);
+		}
 	}
 
 	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
+		String code = codings[PSEUDO_EOF];
+		out.writeBits(code.length(), Integer.parseInt(code, 2));
 		while(true) {
 			int bit = in.readBits(BITS_PER_WORD);
 			if(bit == -1) break;
-			String code = codings[bit];
+			code = codings[bit];
 			out.writeBits(code.length(), Integer.parseInt(code, 2));
 		}
-		String last = codings[PSEUDO_EOF];
-		out.writeBits(last.length(), Integer.parseInt(last, 2));
 	}
 
 	/**

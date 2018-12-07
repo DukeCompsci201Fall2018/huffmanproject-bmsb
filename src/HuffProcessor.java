@@ -35,13 +35,12 @@ public class HuffProcessor {
 	/**
 	 * Compresses a file. Process must be reversible and loss-less.
 	 *
-	 * @param in
-	 *            Buffered bit stream of the file to be compressed.
-	 * @param out
-	 *            Buffered bit stream writing to the output file.
+	 * @param in 
+	 * 			Buffered bit stream of the file to be compressed.
+	 * @param out 
+	 * 			Buffered bit stream writing to the output file.
 	 */
 	public void compress(BitInputStream in, BitOutputStream out){
-
 		int[] counts = readForCounts(in);
 		HuffNode root = makeTreeFromCounts(counts);
 		String[] codings = makeCodingsFromTree(root);
@@ -59,9 +58,7 @@ public class HuffProcessor {
 		freqs[PSEUDO_EOF] = 1;
 		while(true) {
 			int bit = in.readBits(BITS_PER_WORD);
-			if (bit == -1) {
-				break;
-			}
+			if (bit == -1) break;
 			freqs[bit]++;
 		}
 		return freqs;
@@ -70,7 +67,7 @@ public class HuffProcessor {
 	private HuffNode makeTreeFromCounts(int[] counts) {
 		PriorityQueue<HuffNode> pq = new PriorityQueue<>();
 		for(int i = 0; i < counts.length; i++) {
-			if(counts[i] != 0) {
+			if(counts[i] > 0) {
 				pq.add(new HuffNode(i, counts[i], null, null));
 			}
 		}
@@ -117,14 +114,14 @@ public class HuffProcessor {
 	}
 
 	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
-		String code = codings[PSEUDO_EOF];
-		out.writeBits(code.length(), Integer.parseInt(code, 2));
 		while(true) {
 			int bit = in.readBits(BITS_PER_WORD);
 			if(bit == -1) break;
-			code = codings[bit];
+			String code = codings[bit];
 			out.writeBits(code.length(), Integer.parseInt(code, 2));
 		}
+		String code = codings[PSEUDO_EOF];
+		out.writeBits(code.length(), Integer.parseInt(code, 2));
 	}
 
 	/**

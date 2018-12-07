@@ -97,23 +97,22 @@ public class HuffProcessor {
 		if(root.myLeft == null && root.myRight == null) {
 			encodings[root.myValue] = string;
 			return;
-		}else {
-			doEncodings(root.myRight, string + "1", encodings);
-			doEncodings(root.myLeft, string + "0", encodings);
 		}
+		doEncodings(root.myRight, string + "1", encodings);
+		doEncodings(root.myLeft, string + "0", encodings);
 		
 	}
 
 	private void writeHeader(HuffNode root, BitOutputStream out) {
-		if (root.myLeft==null && root.myRight==null) {
-			out.writeBits(1,1);
-			out.writeBits(BITS_PER_WORD + 1, root.myValue);
+		if (root.myLeft==null || root.myRight==null) {
+			out.writeBits(1,0);
+			writeHeader(root.myLeft, out);
+			writeHeader(root.myRight, out);
 
 		}
 		else {
-			out.writeBits(1,root.myValue);
-			writeHeader(root.myLeft, out);
-			writeHeader(root.myRight, out);
+			out.writeBits(1,1);
+			out.writeBits(BITS_PER_WORD + 1, root.myValue);
 		}
 	}
 

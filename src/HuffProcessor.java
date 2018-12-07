@@ -56,6 +56,7 @@ public class HuffProcessor {
 
 	private int[] readForCounts(BitInputStream in) {
 		int[] freqs = new int[ALPH_SIZE + 1];
+		freqs[PSEUDO_EOF] = 1;
 		while(true) {
 			int bit = in.readBits(BITS_PER_WORD);
 			if (bit == -1) {
@@ -63,7 +64,6 @@ public class HuffProcessor {
 			}
 			freqs[bit]++;
 		}
-		freqs[PSEUDO_EOF] = 1;
 		return freqs;
 	}
 
@@ -74,7 +74,6 @@ public class HuffProcessor {
 				pq.add(new HuffNode(i, counts[i], null, null));
 			}
 		}
-		pq.add(new HuffNode(PSEUDO_EOF, 0));
 		
 		while(pq.size() > 1) {
 			HuffNode left = pq.remove();
@@ -104,7 +103,7 @@ public class HuffProcessor {
 	}
 
 	private void writeHeader(HuffNode root, BitOutputStream out) {
-		if (root.myLeft==null || root.myRight==null) {
+		if (root.myLeft!=null || root.myRight!=null) {
 			out.writeBits(1,0);
 			writeHeader(root.myLeft, out);
 			writeHeader(root.myRight, out);
@@ -113,6 +112,7 @@ public class HuffProcessor {
 		else {
 			out.writeBits(1,1);
 			out.writeBits(BITS_PER_WORD + 1, root.myValue);
+			return;
 		}
 	}
 
@@ -156,7 +156,6 @@ public class HuffProcessor {
 		       else {
 		    	   if(bits == 0) current = current.myLeft;
 		    	   else current = current.myRight;
-		    	   
 		    	   if(current.myLeft == null && current.myRight == null) {
 		    		   if(current.myValue == PSEUDO_EOF) break;
 		    		   else {

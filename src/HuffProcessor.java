@@ -61,7 +61,7 @@ public class HuffProcessor {
 			if (bit == -1) {
 				break;
 			}
-			freqs[bit] += 1;
+			freqs[bit]++;
 		}
 		freqs[PSEUDO_EOF] = 1;
 		return freqs;
@@ -74,6 +74,8 @@ public class HuffProcessor {
 				pq.add(new HuffNode(i, counts[i], null, null));
 			}
 		}
+		pq.add(new HuffNode(PSEUDO_EOF, 0));
+		
 		while(pq.size() > 1) {
 			HuffNode left = pq.remove();
 			HuffNode right = pq.remove();

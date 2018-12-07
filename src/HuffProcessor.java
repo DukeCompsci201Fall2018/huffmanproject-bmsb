@@ -149,7 +149,6 @@ public class HuffProcessor {
 		           throw new HuffException("bad input, no PSEUDO_EOF");
 		       }
 		       else {
-		    	   
 		    	   if(bits == 0) current = current.myLeft;
 		    	   else current = current.myRight;
 		    	   
@@ -173,7 +172,7 @@ public class HuffProcessor {
 			return new HuffNode(0,0,left,right);
 		}else {
 			int value = in.readBits(BITS_PER_WORD + 1);
-			return new HuffNode(value, 0);
+			return new HuffNode(value, 0, null, null);
 		}
 	}
 }

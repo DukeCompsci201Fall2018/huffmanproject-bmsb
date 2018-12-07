@@ -92,14 +92,15 @@ public class HuffProcessor {
 	}
 
 	private HuffNode readHeaderTree(BitInputStream in) {
-		if(in.readBits(1) == -1) throw new HuffException("illegal header starts with not 0");
-		if(in.readBits(1) == 0) {
+		int bit = in.readBits(1);
+		if(bit == -1) throw new HuffException("illegal header starts with not 0");
+		if(bit == 0) {
 			HuffNode left = readHeaderTree(in);
 			HuffNode right = readHeaderTree(in);
 			return new HuffNode(0,0,left,right);
 		}else {
 			int value = in.readBits(BITS_PER_WORD + 1);
-			return new HuffNode(value, 0, null, null);
+			return new HuffNode(value, 0);
 		}
 	}
 }
